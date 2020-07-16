@@ -1306,11 +1306,14 @@ class Mailbox
 
         $attachment->addDataPartInfo($dataInfo);
 
+        // Disable all things because it basically triggers a download of the file and we can get this info after we actually save the file to disk without slowing down loading the email.
+        /*
         $attachment->fileInfoRaw = $attachment->getFileInfo(FILEINFO_RAW);
         $attachment->fileInfo = $attachment->getFileInfo(FILEINFO_NONE);
         $attachment->mime = $attachment->getFileInfo(FILEINFO_MIME);
         $attachment->mimeEncoding = $attachment->getFileInfo(FILEINFO_MIME_ENCODING);
         $attachment->fileExtension = $attachment->getFileInfo(FILEINFO_EXTENSION);
+        */
 
         $attachmentsDir = $this->getAttachmentsDir();
 
@@ -1333,7 +1336,7 @@ class Mailbox
                 $dataInfo->setData(file_get_contents($filePath));
                 return $attachment;
             }
-            
+
             $attachment->setFilePath($filePath);
             $attachment->saveToDisk();
         }
