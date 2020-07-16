@@ -1315,13 +1315,25 @@ class Mailbox
         $attachmentsDir = $this->getAttachmentsDir();
 
         if (null != $attachmentsDir) {
-            $fileSysName = \bin2hex(\random_bytes(16)).'.bin';
-            $filePath = $attachmentsDir.DIRECTORY_SEPARATOR.$fileSysName;
+            // $fileSysName = \bin2hex(\random_bytes(16)).'.bin';
+
+            // Create a repeatable file name so we do not have to download the attachment every single time we open the email.
+            // This may not work for everyone but for our purpose it is good enough.
+            $imapLogin   = $dataInfo->mail->getLogin();
+            $fileSysName = hash('sha256', $imapLogin . $attachment->contentId . $attachment->name . $attachment->charset).'.bin';
+            $filePath    = $attachmentsDir.DIRECTORY_SEPARATOR.$fileSysName;
 
             if (\strlen($filePath) > self::MAX_LENGTH_FILEPATH) {
-                $ext = \pathinfo($filePath, PATHINFO_EXTENSION);
+                $ext      = \pathinfo($filePath, PATHINFO_EXTENSION);
                 $filePath = \substr($filePath, 0, self::MAX_LENGTH_FILEPATH - 1 - \strlen($ext)).'.'.$ext;
             }
+
+            if ( file_exists($filePath) ) {
+                $attachment->setFilePath($filePath);
+                $dataInfo->setData(file_get_contents($filePath));
+                return $attachment;
+            }
+            
             $attachment->setFilePath($filePath);
             $attachment->saveToDisk();
         }

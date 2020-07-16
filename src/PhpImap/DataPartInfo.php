@@ -115,4 +115,9 @@ class DataPartInfo
 
         return (null === $this->data) ? '' : $this->data;
     }
+
+    public function setData($data)
+    {
+        $this->data = $data;
+    }
 }
